@@ -68,24 +68,31 @@ if (!createObject('modSystemSetting', array(
 }
 
 
-$settings = include dirname(__DIR__) . '/_build/data/settings.php';
-foreach ($settings as $key => $opts) {
-    $val = $opts['value'];
+if (file_exists(dirname(__DIR__) . '/_build/data/settings.php')) {
+    $settings = include dirname(__DIR__) . '/_build/data/settings.php';
+    foreach ($settings as $key => $opts) {
+        $val = $opts['value'];
 
-    if (isset($opts['xtype'])) $xtype = $opts['xtype'];
-    elseif (is_int($val)) $xtype = 'numberfield';
-    elseif (is_bool($val)) $xtype = 'modx-combo-boolean';
-    else $xtype = 'textfield';
+        if (isset($opts['xtype'])) {
+            $xtype = $opts['xtype'];
+        } elseif (is_int($val)) {
+            $xtype = 'numberfield';
+        } elseif (is_bool($val)) {
+            $xtype = 'modx-combo-boolean';
+        } else {
+            $xtype = 'textfield';
+        }
 
-    if (!createObject('modSystemSetting', array(
-        'key' => 'commerce_cursus.' . $key,
-        'value' => $opts['value'],
-        'xtype' => $xtype,
-        'namespace' => 'commerce_cursus',
-        'area' => $opts['area'],
-        'editedon' => time(),
-    ), 'key', false)) {
-        echo "Error creating commerce_cursus.".$key." setting.\n";
+        if (!createObject('modSystemSetting', array(
+            'key' => 'commerce_cursus.' . $key,
+            'value' => $opts['value'],
+            'xtype' => $xtype,
+            'namespace' => 'commerce_cursus',
+            'area' => $opts['area'],
+            'editedon' => time(),
+        ), 'key', false)) {
+            echo "Error creating commerce_cursus." . $key . " setting.\n";
+        }
     }
 }
 
