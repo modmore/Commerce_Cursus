@@ -1,4 +1,4 @@
-Cursus for Commerce 0.1.0-pl
+Cursus for Commerce 1.1.0-pl
 ---------------------------------
 Released on
 

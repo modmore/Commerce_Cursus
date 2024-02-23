@@ -1,5 +1,15 @@
 <?php
-/* @var modX $modx */
+/**
+ * Resolve load modules
+ *
+ * @package agenda
+ * @subpackage build
+ *
+ * @var array $options
+ * @var xPDOObject $object
+ * @var xPDOTransport $transport
+ */
+
 
 if ($transport->xpdo) {
     switch ($options[xPDOTransport::PACKAGE_ACTION]) {

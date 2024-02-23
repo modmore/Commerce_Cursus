@@ -1,33 +1,61 @@
 <?php
+/**
+ * CommerceCursus Module
+ *
+ * @package commerce_cursus
+ * @subpackage module
+ */
+
 namespace modmore\Commerce_Cursus;
 
 use Commerce;
+use comOrder;
 use comTransaction;
+use CursusEventParticipants;
+use modmore\Commerce\Events\Admin\OrderItemDetail;
 use modmore\Commerce\Events\Checkout;
 use modmore\Commerce\Events\OrderState;
 use modmore\Commerce\Modules\BaseModule;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use xPDO;
 
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
-class Module extends BaseModule {
-
+class Module extends BaseModule
+{
+    /**
+     * {@inheritDoc}
+     * @return mixed|string|null
+     */
     public function getName()
     {
         $this->adapter->loadLexicon('commerce_cursus:default');
         return $this->adapter->lexicon('commerce_cursus');
     }
 
+    /**
+     * {@inheritDoc}
+     * @return string
+     */
     public function getAuthor()
     {
-        return 'modmore';
+        return 'modmore &amp; Treehill Studio';
     }
 
+    /**
+     * {@inheritDoc}
+     * @return mixed|string|null
+     */
     public function getDescription()
     {
         return $this->adapter->lexicon('commerce_cursus.description');
     }
 
+    /**
+     * {@inheritDoc}
+     * @param EventDispatcher $dispatcher
+     * @return void
+     */
     public function initialize(EventDispatcher $dispatcher)
     {
         // Load our lexicon
@@ -41,131 +69,160 @@ class Module extends BaseModule {
         if (!$agenda) {
             throw new \RuntimeException('Agenda is not installed or cannot be loaded.');
         }
-        if (!isset($agenda->cursus) || !$agenda->cursus) {
+        $cursus = &$agenda->cursus;
+        if (!$cursus) {
             throw new \RuntimeException('Cursus is not installed or cannot be loaded.');
         }
 
-        /**
-         * When the order progresses from cart to processing, we mark any associated
-         * participants as booked. This expects an array of participant IDs in the order items.
-         */
-        $dispatcher->addListener(
-            Commerce::EVENT_STATE_CART_TO_PROCESSING,
-            function (OrderState $event) {
-                $order = $event->getOrder();
-                $items = $order->getItems();
-                foreach ($items as $item) {
-                    $participants = $item->getProperty('cursus_participants');
-                    if (empty($participants) || !is_array($participants)) {
-                        continue;
-                    }
-
-                    foreach ($participants as $participantId) {
-                        $this->markParticipantBooked($order, $participantId);
-                    }
-                }
-            }
-        );
-
-
-        /**
-         * During the checkout, after a step is done with its processing, check if the
-         * participant records are still valid. If they expired, they will be removed.
-         */
-        $dispatcher->addListener(
-            Commerce::EVENT_CHECKOUT_AFTER_STEP,
-            function (Checkout $event) {
-                // Skip checking if the order has started the payment process
-                $order = $event->getOrder();
-                $checkStatus = !$order->isPaid() && $order->getState() === \comOrder::STATE_CART;
-                $transactions = $order->getTransactions();
-                foreach ($transactions as $transaction) {
-                    $status = $transaction->get('status');
-                    if ($status >= comTransaction::STATUS_NEW) {
-                        $checkStatus = false;
-                    }
-                }
-                if (!$checkStatus) {
-                    return;
-                }
-
-                $items = $order->getItems();
-                foreach ($items as $item) {
-                    $participants = $item->getProperty('cursus_participants');
-                    if (empty($participants) || !is_array($participants)) {
-                        continue;
-                    }
-
-                    foreach ($participants as $participantId) {
-                        if (!$this->isParticipantValid($order, $participantId)) {
-                            $response = $event->getResponse();
-                            $response->addError('Your participant reservation expired.'); // @todo lexicon
-                            $response->setRedirect('cart');
-                            $order->removeItem($item);
-                        }
-                    }
-                }
-
-            }
-        );
+        $dispatcher->addListener(Commerce::EVENT_STATE_CART_TO_PROCESSING, array($this, 'bookParticipant'));
+        $dispatcher->addListener(Commerce::EVENT_CHECKOUT_AFTER_STEP, array($this, 'checkReservationExpired'));
+        $dispatcher->addListener(Commerce::EVENT_DASHBOARD_ORDER_ITEM_DETAIL, array($this, 'showOnDetailRow'));
     }
 
-    public function getModuleConfiguration(\comModule $module)
+    /**
+     * When the order progresses from cart to processing, we mark any associated
+     * participants as booked. This expects the event participant ID in the order items.
+     *
+     * @param OrderState $event
+     * @return void
+     */
+    public function bookParticipant(OrderState $event)
     {
-        $fields = [];
+        $order = $event->getOrder();
+        $items = $order->getItems();
+        foreach ($items as $item) {
+            $eventParticipants = $item->getProperty('cursus_event_participants') ? explode(',', $item->getProperty('cursus_event_participants')) : [];
+            if (empty($eventParticipants)) {
+                continue;
+            }
 
-        // A more detailed description to be shown in the module configuration. Note that the module description
-        // ({@see self:getDescription}) is automatically shown as well.
-//        $fields[] = new DescriptionField($this->commerce, [
-//            'description' => $this->adapter->lexicon('commerce_cursus.module_description'),
-//        ]);
-
-        return $fields;
+            foreach ($eventParticipants as $eventParticipant) {
+                $this->markEventParticipantBooked($order, $eventParticipant);
+            }
+        }
     }
 
-    private function markParticipantBooked(\comOrder $order, int $participantId): void
+    /**
+     * Mark a Cursus event participant as booked
+     *
+     * @param comOrder $order
+     * @param int $eventParticipantId
+     * @return void
+     */
+    private function markEventParticipantBooked(comOrder $order, int $eventParticipantId): void
     {
-        $participant = $this->adapter->getObject(\CursusEventParticipants::class, [
-            'id' => $participantId,
+        $eventParticipant = $this->adapter->getObject(CursusEventParticipants::class, [
+            'id' => $eventParticipantId,
         ]);
-        if (!$participant) {
-            $order->log('Failed marking Cursus Participant #' . $participantId . ' as paid, object not loaded.');
+        if (!$eventParticipant) {
+            $order->log('Failed marking Cursus Event Participant #' . $eventParticipantId . ' as paid, object not loaded.');
             return;
         }
 
-        $participant->set('paid', true);
-        $participant->set('status', 'booked'); // @todo verify this is correct
-        $participant->save();
-        $order->log('Marked Cursus Participant #' . $participantId . ' as paid and booked');
+        $eventParticipant->set('paid', true);
+        $eventParticipant->set('status', 'booked');
+        $eventParticipant->set('validuntil');
+        $eventParticipant->save();
+
+        $participant = $eventParticipant->getOne('Participant');
+        $participantProfile = $participant->getOne('Profile');
+        $address = $order->getBillingAddress();
+        if ($participantProfile && $address) {
+            $participantProfile->set('email', $address->get('email'));
+            $participantProfile->save();
+        } else {
+            $this->adapter->log(xPDO::LOG_LEVEL_ERROR, 'The participant profile or the billing address was not found!');
+        }
+
+        $order->log('Marked Cursus Event Participant #' . $eventParticipantId . ' as paid and booked');
     }
 
-    private function isParticipantValid(\comOrder $order, int $participantId): bool
+    /**
+     * During the checkout, after a step is done with its processing, check if the
+     * participant records are still valid. If they expired, they will be removed.
+     *
+     * @param Checkout $event
+     * @return void
+     */
+    public function checkReservationExpired(Checkout $event)
     {
-        $participant = $this->adapter->getObject(\CursusEventParticipants::class, [
-            'id' => $participantId,
+        // Skip checking if the order has started the payment process
+        $order = $event->getOrder();
+        $checkStatus = !$order->isPaid() && $order->getState() === comOrder::STATE_CART;
+        $transactions = $order->getTransactions();
+        foreach ($transactions as $transaction) {
+            $status = $transaction->get('status');
+            if ($status >= comTransaction::STATUS_NEW) {
+                $checkStatus = false;
+            }
+        }
+        if (!$checkStatus) {
+            return;
+        }
+
+        $items = $order->getItems();
+        foreach ($items as $item) {
+            $eventParticipants = $item->getProperty('cursus_event_participants') ? explode(',', $item->getProperty('cursus_event_participants')) : [];
+            if (empty($eventParticipant)) {
+                continue;
+            }
+
+            foreach ($eventParticipants as $eventParticipant) {
+                if (!$this->isEventParticipantValid($order, $eventParticipant)) {
+                    $response = $event->getResponse();
+                    $response->addError($this->adapter->lexicon('commerce_cursus.err_reservation_expired'));
+                    $response->setRedirect('cart');
+                    $order->removeItem($item);
+                }
+            }
+        }
+    }
+
+    /**
+     * Check if the event participant record is still valid
+     *
+     * @param comOrder $order
+     * @param int $eventParticipantId
+     * @return bool
+     */
+    private function isEventParticipantValid(comOrder $order, int $eventParticipantId): bool
+    {
+        $eventParticipant = $this->adapter->getObject(CursusEventParticipants::class, [
+            'id' => $eventParticipantId,
         ]);
-        if (!$participant) {
+        if (!$eventParticipant) {
             return false;
         }
 
-        // @todo check an expiration date on the EventParticipant model, TBA to Cursus
-
-        $event = $this->adapter->getObject(\CursusEvents::class, [$participant->get('event_id')]);
-        if (!$event) {
-            $participant->remove();
+        // Check if the event participant reservation is valid
+        if ($eventParticipant->get('validuntil') < time() && $eventParticipant->get('status') === 'reserved') {
+            $eventParticipant->remove();
             return false;
         }
-
-        // Check the latest by which a registration must be completed
-        if (time() < $event->get('latest_registration')) {
-            $participant->remove();
-            return false;
-        }
-
-        // @todo Check the event isn't overbooked (max_participants < count(participants))
-
-        // @todo extend the expiration date if it expires soon and there is room
 
         return true;
+    }
+
+    /**
+     * Add Participant names to the order item detail
+     *
+     * @param OrderItemDetail $event
+     * @return void
+     */
+    public function showOnDetailRow(OrderItemDetail $event)
+    {
+        $item = $event->getItem();
+        $prop = $item->getProperty('participant_names');
+        $event->addRow('<p>' . $prop . '</p>');
+    }
+
+    /**
+     * {@inheritDoc}
+     * @param \comModule $module
+     * @return array
+     */
+    public function getModuleConfiguration(\comModule $module)
+    {
+        return [];
     }
 }
