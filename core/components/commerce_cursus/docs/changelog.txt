@@ -1,5 +1,20 @@
+Cursus for Commerce 1.1.1-pl
+---------------------------------
+
+Released on 2024-02-27
+
+- Invoke OnCursusEventParticipantBooked when an event participant was marked as booked
+
 Cursus for Commerce 1.1.0-pl
 ---------------------------------
-Released on
 
-- First release
+Released on 2023-11-16
+
+- Agenda plugin events to create/remove commerce products during Agenda event creation
+
+Cursus for Commerce 1.0.0-pl
+---------------------------------
+
+Released on 2023-02-17
+
+- First public release

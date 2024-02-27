@@ -23,7 +23,7 @@ if (!defined('MOREPROVIDER_BUILD')) {
     /* define version */
     define('PKG_NAME', 'Commerce_Cursus');
     define('PKG_NAMESPACE', 'commerce_cursus');
-    define('PKG_VERSION', '0.1.0');
+    define('PKG_VERSION', '1.1.1');
     define('PKG_RELEASE', 'pl');
 
     /* load modx */
@@ -83,6 +83,10 @@ $builder->package->put(
             array(
                 'type' => 'php',
                 'source' => $sources['resolvers'] . 'loadmodules.resolver.php',
+            ),
+            array(
+                'type' => 'php',
+                'source' => $sources['resolvers'] . 'events.resolver.php',
             )
         )
     ]

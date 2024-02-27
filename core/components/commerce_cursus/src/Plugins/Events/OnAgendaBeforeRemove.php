@@ -54,7 +54,7 @@ class OnAgendaBeforeRemove extends Plugin
                         $this->modx->log(xPDO::LOG_LEVEL_ERROR, 'Could not load Commerce class!', '', 'OnAgendaBeforeRemove');
                     }
                     /** @var \comProduct $commerceProduct */
-                    $commerceProduct = $this->modx->getObject('comProduct', ['sku' => 'EVENT-' . $ta['id']]);
+                    $commerceProduct = $this->modx->getObject('comProduct', ['id' => $ta['id']]);
                     if ($commerceProduct) {
                         $commerceProduct->fromArray([
                             'removed' => true,

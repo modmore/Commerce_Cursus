@@ -54,12 +54,13 @@ class OnAgendaSave extends Plugin
                         $this->modx->log(xPDO::LOG_LEVEL_ERROR, 'Could not load Commerce class!', '', 'OnAgendaSave');
                     }
                     /** @var \comProduct $commerceProduct */
-                    $commerceProduct = $this->modx->getObject('comProduct', ['sku' => 'EVENT-' . $ta['id']]);
+                    $commerceProduct = $this->modx->getObject('comProduct', ['id' => $ta['id']]);
                     if (!$commerceProduct) {
                         $commerceProduct = $this->modx->newObject('comProduct');
-                        $commerceProduct->set('sku', 'EVENT-' . $ta['id']);
+                        $commerceProduct->set('id', $ta['id']);
                     }
                     $commerceProduct->fromArray([
+                        'sku' => 'EVENT-' . $ta['id'],
                         'name' => $ta['title'],
                         'description' => $ta['description'],
                     ]);

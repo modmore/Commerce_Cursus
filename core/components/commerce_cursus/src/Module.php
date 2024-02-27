@@ -130,6 +130,10 @@ class Module extends BaseModule
         if ($participantProfile && $address) {
             $participantProfile->set('email', $address->get('email'));
             $participantProfile->save();
+            $this->commerce->modx->invokeEvent('OnCursusEventParticipantBooked', [
+                'order' => &$order,
+                'address' => &$address,
+            ]);
         } else {
             $this->adapter->log(xPDO::LOG_LEVEL_ERROR, 'The participant profile or the billing address was not found!');
         }
