@@ -69,7 +69,7 @@ class Module extends BaseModule
         if (!$agenda) {
             throw new \RuntimeException('Agenda is not installed or cannot be loaded.');
         }
-        $cursus = &$agenda->cursus;
+        $cursus = $agenda->cursus;
         if (!$cursus) {
             throw new \RuntimeException('Cursus is not installed or cannot be loaded.');
         }

@@ -61,7 +61,7 @@ class Commerce_Cursus
      * @param modX $modx A reference to the modX instance.
      * @param array $options An array of options. Optional.
      */
-    public function __construct(modX &$modx, $options = [])
+    public function __construct(modX $modx, $options = [])
     {
         $this->modx =& $modx;
         $this->namespace = $this->getOption('namespace', $options, $this->namespace);
@@ -141,68 +141,5 @@ class Commerce_Cursus
     {
         $option = $this->getOption($key, $options, $default);
         return ($option === 'true' || $option === true || $option === '1' || $option === 1);
-    }
-
-    /**
-     * Get JSON Option
-     *
-     * @param string $key
-     * @param array $options
-     * @param mixed $default
-     * @return array
-     */
-    public function getJsonOption($key, $options = [], $default = null)
-    {
-        $value = json_decode($this->modx->getOption($key, $options, $default ?? ''), true);
-        return (is_array($value)) ? $value : [];
-    }
-
-    /**
-     * Get Bound Option
-     *
-     * @param string $key
-     * @param array $options
-     * @param mixed $default
-     * @return mixed
-     */
-    public function getBoundOption($key, $options = [], $default = null)
-    {
-        $value = trim($this->getOption($key, $options, $default));
-        if (strpos($value, '@FILE') === 0) {
-            $path = trim(substr($value, strlen('@FILE')));
-            // Sanitize to avoid ../ style path traversal
-            $path = preg_replace(["/\.*[\/|\\\]/i", "/[\/|\\\]+/i"], ['/', '/'], $path);
-            // Include only files inside the MODX base path
-            if (strpos($path, MODX_BASE_PATH) === 0 && file_exists($path)) {
-                $value = file_get_contents($path);
-            }
-        } elseif (strpos($value, '@CHUNK') === 0) {
-            $name = trim(substr($value, strlen('@CHUNK')));
-            $chunk = $this->modx->getObject('modChunk', ['name' => $name]);
-            $value = ($chunk) ? $chunk->get('snippet') : '';
-        }
-        return $value;
-    }
-
-    /**
-     * Set a local configuration option.
-     *
-     * @param array $options The options to be set.
-     * @param bool $merge Merge the new options with the existing options.
-     */
-    public function setOptions(array $options = [], $merge = true)
-    {
-        $this->options = ($merge) ? array_merge($this->options, $options) : $options;
-    }
-
-    /**
-     * Set a local configuration option.
-     *
-     * @param string $key The option key to be set.
-     * @param mixed $value The value.
-     */
-    public function setOption(string $key, $value)
-    {
-        $this->options[$key] = $value;
     }
 }
