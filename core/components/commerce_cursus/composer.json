@@ -1,10 +1,31 @@
 {
-    "require": {
-        "php": ">=7.4.0"
+  "name": "modmore/commerce_cursus",
+  "description": "Cursus for Commerce",
+  "authors": [
+    {
+      "name": "Mark Hamstra",
+      "email": "support@modmore.com",
+      "homepage": "https://modmore.com"
     },
-    "autoload": {
-        "psr-4": {
-            "modmore\\Commerce_Cursus\\" : "src/"
-        }
+    {
+      "name": "Thomas Jakobi",
+      "email": "office@treehillstudio.com",
+      "homepage": "https://treehillstudio.com"
     }
+  ],
+  "license": "MIT",
+  "config": {
+    "platform": {
+      "php": "7.4"
+    }
+  },
+  "require": {
+    "php": ">=7.4.0",
+    "ext-json": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "modmore\\Commerce_Cursus\\": "src/"
+    }
+  }
 }

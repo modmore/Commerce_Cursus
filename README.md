@@ -13,7 +13,7 @@ Create (in a hook or something) the CursusEventParticipant records, [create an o
 
 For example:
 
-````php
+``` php
 <?php
 use modmore\Commerce\Frontend\Checkout\Standard;
 use modmore\Commerce\Frontend\Steps\Cart;
@@ -24,7 +24,8 @@ $params = ['mode' => $modx->getOption('commerce.mode')];
 /** @var Commerce|null $commerce */
 $commerce = $modx->getService('commerce', 'Commerce', $path, $params);
 if (!($commerce instanceof Commerce)) {
-    return '<p class="error">Oops! It is not possible to view your cart currently. We\'re sorry for the inconvenience. Please try again later.</p>';
+    return '<p class="error">Oops! It is not possible to view your cart currently.' +
+     'We\'re sorry for the inconvenience. Please try again later.</p>';
 }
 
 if ($commerce->isDisabled()) {
@@ -32,41 +33,61 @@ if ($commerce->isDisabled()) {
 }
 
 $ids = [];
-
+$participantNames = [];
 // ..
-// load cursus
-// handle submission
-// create records in commerce as unpaid reservation
-$participant->save();
-// keep id in a local array
-$ids[] = $participant->get('id');
+// Load Cursus
+// Handle submission
+// Iterate over the participants
+foreach($cursusParticipants as $cursusParticipant) {
+    // Create event participant records in Cursus as unpaid reservation valid the next 15 minutes.
+    $validUntil = new DateTime('+15 minutes');
+    /** @var CursusEventParticipants $cursusEventParticipant */
+    $cursusEventParticipant = $this->modx->newObject('CursusEventParticipants');
+    $cursusEventParticipant->fromArray([
+        'event_id' => $agendaEventDateId, // ID of the Agenda repeating event
+        'participant_id' => $cursusParticipant->get('id'),
+        'status' => 'reserved',
+        'validuntil' => $validUntil->getTimestamp(),
+    ]);
+    if (!$cursusEventParticipant->save()) {
+        $this->modx->log(\xPDO::LOG_LEVEL_ERROR, 'Can\'t save the event participant!');
+        $this->hook->addError('message', 'Der Kursteilnehmer konnte nicht gespeichert werden!');
+        return false;
+    };
+    // Keep the event participant ids in a local array
+    $ids[] = $eventParticipant->get('id');
+    $participantNames[] = $eventParticipant->get('firstname') . ' ' . $eventParticipant->get('name')
+}
 
 $order = \comOrder::loadUserOrder($commerce);
 
-// Optionally, reset the cart if only one reservation can be taken per order
+// Optionally, reset the cart if only one reservation with multiple participants can be taken per order
 $orderItems = $order->getItems();
 foreach ($orderItems as $orderItem) {
     $order->removeItem($orderItem);
 }
 
-// Create new item
+// Create Order Item
 $item = $commerce->adapter->newObject('comOrderItem');
 $item->set('currency', $order->get('currency'));
 $item->fromArray([
   'delivery_type' => $deliveryTypeId, // ID of a delivery type, must be set
   'tax_group' => $taxGroupId, // ID of a tax group, must be set
-  'sku' => 'Product Code',
-  'name' => 'Name',
-  'description' => '...',
-  'price' => 1334, // in cents!!
+  'product' => $agendaEventId, // ID of the Agenda event
+  'sku' => 'EVENT-' . $agendaEventDateId, // ID of the Agenda repeating event
+  'name' => $agendaEventTitle, // Title of the Agenda event
+  'description' => $agendaEventRange, // Title of the Agenda event
+  'is_manual_price' => true,
+  'price' => $agendaEventPrice, // Price of the Agenda Event in cents
   'quantity' => 1,
 ]);
-$item->setProperty('cursus_participants', $ids); // store IDs as an **array**
+$item->setProperty('cursus_event_participants', implode(',', $ids));
+$item->setProperty('participant_names', implode(', ', $participantNames));
 
-// add to order
+// Add to order
 $order->addItem($item);
 
-// send user to cart
+// Send user to cart
 $cartResource = $modx->getOption('commerce.cart_resource');
 $cartUrl = $modx->makeUrl($cartResource);
 $modx->sendRedirect($cartUrl);
@@ -78,9 +99,9 @@ if ($order instanceof comSessionCartOrder) {
 $checkoutResource = $modx->getOption('commerce.checkout_resource');
 $checkoutUrl = $modx->makeUrl($checkoutResource);
 $modx->sendRedirect($checkoutUrl);
-````
+```
 
-The module will parse the `cursus_participants` field when the order is moved to the Processing state.
+The module will parse the `cursus_event_participants` field when the order is moved to the Processing state.
 
 The module will also make sure the reserved participant record is still valid during the checkout.
 
