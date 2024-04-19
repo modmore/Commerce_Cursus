@@ -167,7 +167,7 @@ class Module extends BaseModule
         $items = $order->getItems();
         foreach ($items as $item) {
             $eventParticipants = $item->getProperty('cursus_event_participants') ? explode(',', $item->getProperty('cursus_event_participants')) : [];
-            if (empty($eventParticipant)) {
+            if (empty($eventParticipants)) {
                 continue;
             }
 
