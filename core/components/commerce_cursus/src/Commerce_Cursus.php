@@ -4,7 +4,7 @@
  *
  * Copyright 2023-2024 by modmore <support@modmore.com> & Thomas Jakobi <office@treehillstudio.com>
  *
- * @package agenda
+ * @package commerce_cursus
  * @subpackage classfile
  */
 
