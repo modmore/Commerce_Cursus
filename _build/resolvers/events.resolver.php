@@ -76,6 +76,7 @@ function removeEvent(xPDO $modx, $name)
 
 $events = [
     'OnCursusEventParticipantBooked',
+    'OnCursusEventParticipantRestored',
 ];
 
 /** @var xPDO $modx */
