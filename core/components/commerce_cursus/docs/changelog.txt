@@ -1,19 +1,19 @@
 Cursus for Commerce 1.1.1-pl
----------------------------------
-TBA
+----------------------------
+Released on 2024-04-28
 
 - Check expired reservations before a Commerce step
 - Invoke OnCursusEventParticipantRestored when an expired event participant was marked as booked
 
 Cursus for Commerce 1.1.0-pl
----------------------------------
+----------------------------
 Released on 2024-04-19
 
 - Invoke OnCursusEventParticipantBooked when an event participant was marked as booked
 - Agenda plugin events to create/remove commerce products during Agenda event creation
 
 Cursus for Commerce 1.0.0-pl
----------------------------------
+----------------------------
 Released on 2023-02-17
 
 - First public release
