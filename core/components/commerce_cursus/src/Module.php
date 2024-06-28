@@ -75,7 +75,7 @@ class Module extends BaseModule
         }
 
         $dispatcher->addListener(Commerce::EVENT_STATE_CART_TO_PROCESSING, array($this, 'bookParticipant'));
-        $dispatcher->addListener(Commerce::EVENT_CHECKOUT_AFTER_STEP, array($this, 'checkReservationExpired'));
+        $dispatcher->addListener(Commerce::EVENT_CHECKOUT_BEFORE_STEP, array($this, 'checkReservationExpired'));
         $dispatcher->addListener(Commerce::EVENT_DASHBOARD_ORDER_ITEM_DETAIL, array($this, 'showOnDetailRow'));
     }
 
@@ -113,10 +113,22 @@ class Module extends BaseModule
     {
         $eventParticipant = $this->adapter->getObject(CursusEventParticipants::class, [
             'id' => $eventParticipantId,
+            [
+                'status:=' => 'reserved',
+                'OR:status:=' => 'expired',
+            ]
         ]);
         if (!$eventParticipant) {
             $order->log('Failed marking Cursus Event Participant #' . $eventParticipantId . ' as paid, object not loaded.');
             return;
+        }
+
+        if ($eventParticipant->get('status') === 'expired') {
+            $this->adapter->log(xPDO::LOG_LEVEL_ERROR, 'The an expired event participant was set to booked! Please check, wether the event is overbooked.');
+            $this->commerce->modx->invokeEvent('OnCursusEventParticipantRestored', [
+                'order' => &$order,
+                'address' => &$address,
+            ]);
         }
 
         $eventParticipant->set('paid', true);
@@ -200,7 +212,8 @@ class Module extends BaseModule
 
         // Check if the event participant reservation is valid
         if ($eventParticipant->get('validuntil') < time() && $eventParticipant->get('status') === 'reserved') {
-            $eventParticipant->remove();
+            $eventParticipant->set('status', 'expired');
+            $eventParticipant->save();
             return false;
         }
 
