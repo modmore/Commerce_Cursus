@@ -124,7 +124,7 @@ class Module extends BaseModule
         }
 
         if ($eventParticipant->get('status') === 'expired') {
-            $this->adapter->log(xPDO::LOG_LEVEL_ERROR, 'The an expired event participant was set to booked! Please check, wether the event is overbooked.');
+            $this->adapter->log(xPDO::LOG_LEVEL_ERROR, 'The expired event participant was set to booked! Please check, wether the event is overbooked.');
             $this->commerce->modx->invokeEvent('OnCursusEventParticipantRestored', [
                 'order' => &$order,
                 'address' => &$address,
