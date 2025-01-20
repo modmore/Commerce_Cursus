@@ -33,10 +33,6 @@ abstract class Plugin
     {
         $this->scriptProperties = &$scriptProperties;
         $this->modx =& $modx;
-        $corePath = $this->modx->getOption('commerce_cursus.core_path', null, $this->modx->getOption('core_path') . 'components/commerce_cursus/');
-        $this->commerce_cursus = $this->modx->getService('commerce_cursus', 'Commerce_Cursus', $corePath . 'model/commerce_cursus/', [
-            'core_path' => $corePath
-        ]);
     }
 
     /**
