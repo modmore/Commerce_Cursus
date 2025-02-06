@@ -128,6 +128,7 @@ class Module extends BaseModule
             $this->commerce->modx->invokeEvent('OnCursusEventParticipantRestored', [
                 'order' => &$order,
                 'address' => &$address,
+                'event_participant' => &$eventParticipant,
             ]);
         }
 
@@ -145,6 +146,7 @@ class Module extends BaseModule
             $this->commerce->modx->invokeEvent('OnCursusEventParticipantBooked', [
                 'order' => &$order,
                 'address' => &$address,
+                'event_participant' => &$eventParticipant,
             ]);
         } else {
             $this->adapter->log(xPDO::LOG_LEVEL_ERROR, 'The participant profile or the billing address was not found!');

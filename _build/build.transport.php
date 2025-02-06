@@ -23,7 +23,7 @@ if (!defined('MOREPROVIDER_BUILD')) {
     /* define version */
     define('PKG_NAME', 'Commerce_Cursus');
     define('PKG_NAMESPACE', 'commerce_cursus');
-    define('PKG_VERSION', '1.1.1');
+    define('PKG_VERSION', '1.1.2');
     define('PKG_RELEASE', 'pl');
 
     /* load modx */
