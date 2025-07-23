@@ -6,7 +6,7 @@
  * @subpackage build
  *
  * @var array $options
- * @var xPDOObject $object
+ * @var xPDOTransport $transport
  */
 
 /**
@@ -79,23 +79,23 @@ $events = [
     'OnCursusEventParticipantRestored',
 ];
 
-/** @var xPDO $modx */
-$modx =& $object->xpdo;
-
 $success = true;
-switch ($options[xPDOTransport::PACKAGE_ACTION]) {
-    case xPDOTransport::ACTION_INSTALL:
-    case xPDOTransport::ACTION_UPGRADE:
-    foreach ($events as $event) {
-            $created = createEvent($modx, $event, 6);
-            $success = $success && $created;
-        }
-        break;
-    case xPDOTransport::ACTION_UNINSTALL:
-        foreach ($events as $event) {
-            $removed = removeEvent($modx, $event);
-            $success = $success && $removed;
-        }
-        break;
+if ($transport->xpdo) {
+    $modx =& $transport->xpdo;
+    switch ($options[xPDOTransport::PACKAGE_ACTION]) {
+        case xPDOTransport::ACTION_INSTALL:
+        case xPDOTransport::ACTION_UPGRADE:
+            foreach ($events as $event) {
+                $created = createEvent($modx, $event, 6);
+                $success = $success && $created;
+            }
+            break;
+        case xPDOTransport::ACTION_UNINSTALL:
+            foreach ($events as $event) {
+                $removed = removeEvent($modx, $event);
+                $success = $success && $removed;
+            }
+            break;
+    }
 }
 return $success;
