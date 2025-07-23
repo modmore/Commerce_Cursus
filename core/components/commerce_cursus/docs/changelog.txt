@@ -1,3 +1,10 @@
+Cursus for Commerce 1.1.3-pl
+----------------------------
+Released on 2025-07-23
+
+- Make the namespace no longer configurable
+- Fix a resolver installation issue
+
 Cursus for Commerce 1.1.2-pl
 ----------------------------
 Released on 2025-02-06
