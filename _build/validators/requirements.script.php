@@ -1,5 +1,7 @@
 <?php
+/** @var xPDOTransport $transport */
 /** @var modX $modx */
+/** @var array $options */
 $modx =& $transport->xpdo;
 
 if (!function_exists('checkVersion')) {
@@ -66,7 +68,7 @@ if (!function_exists('checkVersion')) {
     }
 }
 $success = false;
-switch($options[xPDOTransport::PACKAGE_ACTION]) {
+switch ($options[xPDOTransport::PACKAGE_ACTION]) {
     case xPDOTransport::ACTION_INSTALL:
     case xPDOTransport::ACTION_UPGRADE:
         $success = true;
@@ -97,12 +99,10 @@ switch($options[xPDOTransport::PACKAGE_ACTION]) {
             ], $modx)) {
                 $success = false;
             }
-        }
-        else {
-            $modx->log( xPDO::LOG_LEVEL_ERROR, '- Commerce not installed.');
+        } else {
+            $modx->log(xPDO::LOG_LEVEL_ERROR, '- Commerce not installed.');
             $success = false;
         }
-
 
         if ($success) {
             $modx->log(xPDO::LOG_LEVEL_INFO, 'Minimum requirements look good! Visit Extras > Commerce > Configuration > Modules to enable the module after installation.');
@@ -112,8 +112,7 @@ switch($options[xPDOTransport::PACKAGE_ACTION]) {
             checkVersion('PHP', PHP_VERSION, [
                 '2019-12-01 12:00:00' => '8.0',
             ], $modx);
-        }
-        else {
+        } else {
             $modx->log(xPDO::LOG_LEVEL_ERROR, 'Your server or MODX installation does not meet the minimum requirements for this extra. Installation cannot continue.');
         }
 
