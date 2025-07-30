@@ -25,12 +25,12 @@ foreach ($settingSource as $key => $options) {
     /** @var modSystemSetting */
     $setting = $modx->newObject('modSystemSetting');
     $setting->fromArray([
-        'key' => 'scheduler.' . $key,
+        'key' => 'commerce_cursus.' . $key,
         'xtype' => $xtype,
         'value' => $options['value'],
-        'namespace' => 'scheduler',
+        'namespace' => 'commerce_cursus',
         'area' => $options['area'],
-        'editedon' => time(),
+        'editedon' => NULL,
     ], '', true, true);
     $settings[] = $setting;
 }
