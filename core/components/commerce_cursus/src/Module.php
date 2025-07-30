@@ -141,8 +141,10 @@ class Module extends BaseModule
         $participantProfile = $participant->getOne('Profile');
         $address = $order->getBillingAddress();
         if ($participantProfile && $address) {
-            $participantProfile->set('email', $address->get('email'));
-            $participantProfile->save();
+            if ($this->adapter->getOption('commerce_cursus.set_email_from_order')) {
+                $participantProfile->set('email', $address->get('email'));
+                $participantProfile->save();
+            }
             $this->commerce->modx->invokeEvent('OnCursusEventParticipantBooked', [
                 'order' => &$order,
                 'address' => &$address,
