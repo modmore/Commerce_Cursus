@@ -24,10 +24,11 @@ if (!defined('MOREPROVIDER_BUILD')) {
     /* define version */
     define('PKG_NAME', 'Commerce_Cursus');
     define('PKG_NAMESPACE', 'commerce_cursus');
-    define('PKG_VERSION', '1.2.1');
+    define('PKG_VERSION', '1.2.1-p2');
     define('PKG_RELEASE', 'pl');
 
     /* load modx */
+    $test = dirname(__DIR__) . '/config.core.php';
     require_once dirname(__DIR__) . '/config.core.php';
     require_once MODX_CORE_PATH . 'model/modx/modx.class.php';
     $modx = new modX();
@@ -124,7 +125,7 @@ $modx->log(modX::LOG_LEVEL_INFO, 'Created category.'); flush();
 $snippets = include $sources['data'] . 'transport.snippets.php';
 if (is_array($snippets)) {
     $category->addMany($snippets);
-    $modx->log(modX::LOG_LEVEL_INFO, 'Packaged in ' . count($snippets) . 'snippets.'); flush();
+    $modx->log(modX::LOG_LEVEL_INFO, 'Packaged in ' . count($snippets) . ' snippets.'); flush();
 }
 unset($snippets);
 
@@ -152,7 +153,7 @@ $attr = [
     ]
 ];
 
-$vehicle = $builder->createVehicle($category,$attr);
+$vehicle = $builder->createVehicle($category, $attr);
 
 /* now pack in the license file, readme and setup options */
 $builder->setPackageAttributes([

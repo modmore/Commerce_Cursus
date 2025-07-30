@@ -1,4 +1,5 @@
 config.core.php
-/_packages/*/
-/core/components/commerce_cursus/vendor/*/
+/_packages/*
+/core/components/commerce_cursus/vendor/*
 /node_modules/
+_packages
