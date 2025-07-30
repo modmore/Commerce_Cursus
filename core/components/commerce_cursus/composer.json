@@ -1,6 +1,7 @@
 {
   "name": "modmore/commerce_cursus",
   "description": "Cursus for Commerce",
+  "version": "1.2.1",
   "authors": [
     {
       "name": "Mark Hamstra",

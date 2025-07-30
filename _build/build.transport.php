@@ -24,7 +24,7 @@ if (!defined('MOREPROVIDER_BUILD')) {
     /* define version */
     define('PKG_NAME', 'Commerce_Cursus');
     define('PKG_NAMESPACE', 'commerce_cursus');
-    define('PKG_VERSION', '1.2.0');
+    define('PKG_VERSION', '1.2.1');
     define('PKG_RELEASE', 'pl');
 
     /* load modx */
@@ -94,64 +94,65 @@ $builder->package->put(
 $modx->log(modX::LOG_LEVEL_INFO, 'Packaged in core, requirements validator, and module loading resolver.'); flush();
 
 /**
+ * Settings
+ */
+$settings = include $sources['data'] . 'transport.settings.php';
+if (is_array($settings)) {
+    $attributes = [
+        xPDOTransport::UNIQUE_KEY => 'key',
+        xPDOTransport::PRESERVE_KEYS => true,
+        xPDOTransport::UPDATE_OBJECT => false,
+    ];
+    foreach ($settings as $setting) {
+        $vehicle = $builder->createVehicle($setting, $attributes);
+        $builder->putVehicle($vehicle);
+    }
+    $modx->log(modX::LOG_LEVEL_INFO, 'Packaged in ' . count($settings) . ' system settings.'); flush();
+    unset($settings, $setting, $attributes);
+}
+
+/**
  * Category
  */
 $category = $modx->newObject('modCategory');
-$category->set('category', 'CommerceCursus');
+$category->set('category', 'Cursus for Commerce');
 $modx->log(modX::LOG_LEVEL_INFO, 'Created category.'); flush();
 
 /**
  * Snippets
  */
-$snippetSource = include $sources['data'] . 'snippets.php';
-$snippets = [];
-foreach ($snippetSource as $name => $options) {
-    $snippets[$name] = $modx->newObject('modSnippet');
-    $snippets[$name]->fromArray([
-        'name' => $name,
-        'description' => $options['description'],
-        'snippet' => getSnippetContent($sources['snippets'] . $options['file']),
-    ], '', true, true);
+$snippets = include $sources['data'] . 'transport.snippets.php';
+if (is_array($snippets)) {
+    $category->addMany($snippets);
+    $modx->log(modX::LOG_LEVEL_INFO, 'Packaged in ' . count($snippets) . 'snippets.'); flush();
 }
-$category->addMany($snippets);
 unset($snippets);
-$modx->log(modX::LOG_LEVEL_INFO, 'Packaged in snippets.'); flush();
 
 /**
- * Assets
- *
- * If you have web-accessible assets in core/components/<package>/, then uncomment this section to package them too
+ * Plugins
  */
-//$builder->package->put(
-//    [
-//        'source' => $sources['source_assets'],
-//        'target' => "return MODX_ASSETS_PATH . 'components/';",
-//    ],
-//    [
-//        'vehicle_class' => 'xPDOFileVehicle',
-//    ]
-//);
-//$modx->log(modX::LOG_LEVEL_INFO,'Packaged in assets.'); flush();
+$plugins = include $sources['data'] . 'transport.plugins.php';
+if (is_array($plugins)) {
+    $category->addMany($plugins, 'Plugins');
+    $modx->log(modX::LOG_LEVEL_INFO, 'Packaged in ' . count($plugins) . ' plugins.'); flush();
+}
+unset($plugins);
 
-/**
- * Settings
- *
- * If you have settings, uncomment this section to create them. See data/settings.php.
- */
-//$settings = include $sources['data'] . 'transport.settings.php';
-//if (is_array($settings)) {
-//    $attributes = [
-//        xPDOTransport::UNIQUE_KEY => 'key',
-//        xPDOTransport::PRESERVE_KEYS => true,
-//        xPDOTransport::UPDATE_OBJECT => false,
-//    ];
-//    foreach ($settings as $setting) {
-//        $vehicle = $builder->createVehicle($setting,$attributes);
-//        $builder->putVehicle($vehicle);
-//    }
-//    $modx->log(modX::LOG_LEVEL_INFO,'Packaged in ' . count($settings) . ' system settings.'); flush();
-//    unset($settings,$setting,$attributes);
-//}
+$attr = [
+    xPDOTransport::UNIQUE_KEY => 'category',
+    xPDOTransport::PRESERVE_KEYS => false,
+    xPDOTransport::UPDATE_OBJECT => true,
+    xPDOTransport::RELATED_OBJECTS => true,
+    xPDOTransport::RELATED_OBJECT_ATTRIBUTES => [
+        'Snippets' => [
+            xPDOTransport::PRESERVE_KEYS => false,
+            xPDOTransport::UPDATE_OBJECT => true,
+            xPDOTransport::UNIQUE_KEY => 'name',
+        ],
+    ]
+];
+
+$vehicle = $builder->createVehicle($category,$attr);
 
 /* now pack in the license file, readme and setup options */
 $builder->setPackageAttributes([

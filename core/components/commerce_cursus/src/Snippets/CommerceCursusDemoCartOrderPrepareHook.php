@@ -1,6 +1,6 @@
 <?php
 /**
- * Commerce Cursus Cart Order Prepare Hook
+ * Cursus for Commerce Demo Cart Order Prepare Hook
  *
  * @package commerce_cursus
  * @subpackage hook
@@ -22,21 +22,8 @@ use MODX\Revolution\modResource;
 use TreehillStudio\Cursus\Helper\Parse;
 use xPDO;
 
-class CommerceCursusCartOrderPrepareHook extends Hook
+class CommerceCursusDemoCartOrderPrepareHook extends Hook
 {
-    /**
-     * Get default snippet properties.
-     *
-     * @return array
-     */
-    public function getDefaultProperties()
-    {
-        return [
-            'eventTpl' => 'tplCommerceCursusCartOrderEvent',
-            'eventParticipantTpl' => 'tplCommerceCursusCartOrderEventParticipant',
-        ];
-    }
-
     /**
      * Execute the hook and return success.
      *

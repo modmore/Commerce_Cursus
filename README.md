@@ -11,11 +11,13 @@ Install the package and enable the module in Commerce > Configuration > Modules.
 
 Create (in a hook or something) the CursusEventParticipant records, [create an order item that you add to the cart](https://forum.modmore.com/t/extending-comorderitem-adding-custom-products-to-cart/1187/5?u=mhamstra), and add an array of participant IDs in the comOrderItem properties with key `cursus_participants`.
 
-There is an example hook installed with the package called CommerceCursusCartOrderPrepare that can be used as FormIt hook. Feel free to extend it to your needs.
-
 The module will parse the `cursus_event_participants` field when the order is moved to the Processing state.
 
 The module will also make sure the reserved participant record is still valid during the checkout.
+
+There is an example hook installed with the package called CommerceCursusDemoCartOrderPrepare that can be used as FormIt hook. Feel free to extend it to suit your needs.
+
+By default, the CommerceCursusDemo plugin is disabled, but it can be used to add and remove Commerce products when an Agenda event is created or deleted. Feel free to extend it to suit your needs. 
 
 ## Building
 

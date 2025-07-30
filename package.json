@@ -1,0 +1,10 @@
+{
+  "name": "commerce_cursus",
+  "description": "Connecting Cursus with Commerce",
+  "author": "Mark Hamstra <office@treehillstudio.com>, Thomas Jakobi <office@treehillstudio.com>",
+  "private": true,
+  "devDependencies": {
+    "gulp": "^5.0.0",
+    "gulp-replace": "^1.1.4"
+  }
+}
