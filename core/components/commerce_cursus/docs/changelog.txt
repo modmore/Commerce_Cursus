@@ -3,13 +3,13 @@ Cursus for Commerce 1.2.1-pl
 Released on 2025-07-30
 
 - Add the deactivated CommerceCursusDemo plugin to add and remove Commerce products when an Agenda event is created or deleted
+- Add the system setting commerce_cursus.set_email_from_order to set the email of the Cursus participant by the email address in the Commerce order
 
 Cursus for Commerce 1.2.0-pl
 ----------------------------
 Released on 2025-07-29
 
 - Add the CommerceCursusDemoCartOrderPrepare FormIt hook to show how Cursus participants can be created, assigned as participant to the Cursus event and added to the Commerce cart
-- Add the system setting commerce_cursus.set_email_from_order to set the email of the Cursus participant by the email address in the Commerce order
 
 Cursus for Commerce 1.1.3-pl
 ----------------------------
