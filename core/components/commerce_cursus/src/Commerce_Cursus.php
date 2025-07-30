@@ -47,7 +47,7 @@ class Commerce_Cursus
      * The version
      * @var string $version
      */
-    public $version = '1.2.1';
+    public $version = '1.2.1-p2';
 
     /**
      * The class options
