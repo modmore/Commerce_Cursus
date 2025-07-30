@@ -1,6 +1,6 @@
 <?php
 /**
- * CommerceCursus Module
+ * Cursus for Commerce Module
  *
  * @package commerce_cursus
  * @subpackage module

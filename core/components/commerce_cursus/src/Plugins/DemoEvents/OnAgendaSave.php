@@ -4,7 +4,7 @@
  * @subpackage plugin
  */
 
-namespace modmore\Commerce_Cursus\Plugins\Events;
+namespace modmore\Commerce_Cursus\Plugins\DemoEvents;
 
 use AgendaEvents;
 use Commerce;
@@ -13,7 +13,7 @@ use TreehillStudio\Cursus\Cursus;
 use modmore\Commerce_Cursus\Plugins\Plugin;
 use xPDO;
 
-class OnAgendaBeforeRemove extends Plugin
+class OnAgendaSave extends Plugin
 {
     /** @var Agenda $agenda */
     public $agenda;
@@ -33,7 +33,7 @@ class OnAgendaBeforeRemove extends Plugin
 
         if ($eventId && $className == 'AgendaEvents') {
             if (!$this->modx->loadClass('agenda.AgendaEvents', $this->agenda->getOption('modelPath'))) {
-                $this->modx->log(xPDO::LOG_LEVEL_ERROR, 'Could not load AgendaEvents class!', '', 'OnAgendaBeforeRemove');
+                $this->modx->log(xPDO::LOG_LEVEL_ERROR, 'Could not load AgendaEvents class!', '', 'OnAgendaSave');
             } else {
                 $eventClass = new AgendaEvents($this->modx);
                 $eventsOptions = [
@@ -51,18 +51,20 @@ class OnAgendaBeforeRemove extends Plugin
                     /** @var Commerce|null $commerce */
                     $commerce = $this->modx->getService('commerce', 'Commerce', $path, $params);
                     if (!($commerce instanceof Commerce)) {
-                        $this->modx->log(xPDO::LOG_LEVEL_ERROR, 'Could not load Commerce class!', '', 'OnAgendaBeforeRemove');
+                        $this->modx->log(xPDO::LOG_LEVEL_ERROR, 'Could not load Commerce class!', '', 'OnAgendaSave');
                     }
                     /** @var \comProduct $commerceProduct */
                     $commerceProduct = $this->modx->getObject('comProduct', ['id' => $ta['id']]);
-                    if ($commerceProduct) {
-                        $commerceProduct->fromArray([
-                            'removed' => true,
-                            'removed_on' => time(),
-                            'removed_by' => $this->modx->user->get('id'),
-                        ]);
-                        $commerceProduct->save();
+                    if (!$commerceProduct) {
+                        $commerceProduct = $this->modx->newObject('comProduct');
+                        $commerceProduct->set('id', $ta['id']);
                     }
+                    $commerceProduct->fromArray([
+                        'sku' => 'EVENT-' . $ta['id'],
+                        'name' => $ta['title'],
+                        'description' => $ta['description'],
+                    ]);
+                    $commerceProduct->save();
                 }
             }
 

@@ -2,7 +2,7 @@
 /**
  * Commerce_Cursus
  *
- * Copyright 2023-2024 by modmore <support@modmore.com> & Thomas Jakobi <office@treehillstudio.com>
+ * Copyright 2023-2025 by modmore <support@modmore.com> & Thomas Jakobi <office@treehillstudio.com>
  *
  * @package commerce_cursus
  * @subpackage classfile
@@ -47,7 +47,7 @@ class Commerce_Cursus
      * The version
      * @var string $version
      */
-    public $version = '1.1.0';
+    public $version = '1.2.1';
 
     /**
      * The class options
