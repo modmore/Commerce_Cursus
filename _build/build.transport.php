@@ -24,7 +24,7 @@ if (!defined('MOREPROVIDER_BUILD')) {
     /* define version */
     define('PKG_NAME', 'Commerce_Cursus');
     define('PKG_NAMESPACE', 'commerce_cursus');
-    define('PKG_VERSION', '1.2.1-p2');
+    define('PKG_VERSION', '1.2.2');
     define('PKG_RELEASE', 'pl');
 
     /* load modx */
@@ -167,6 +167,8 @@ $attr = [
 ];
 
 $vehicle = $builder->createVehicle($category, $attr);
+$builder->putVehicle($vehicle);
+$modx->log(modX::LOG_LEVEL_INFO, 'Packaged in category.'); flush();
 
 /* now pack in the license file, readme and setup options */
 $builder->setPackageAttributes([
